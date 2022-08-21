@@ -1,0 +1,7 @@
+compatible: "barrot_serial"
+description: Barrot
+
+properties:
+    btaddr:
+      type: uint8-array
+      required: true

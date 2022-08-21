@@ -1,0 +1,176 @@
+/*
+ * Copyright (c) 2018 Roman Tataurov <diytronic@yandex.ru>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <nordic/nrf51822_qfac.dtsi>
+#include "controller-pinctrl.dtsi"
+
+/ {
+	model = "Waveshare BLE400";
+	compatible = "waveshare,BLE400";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,display = &ssd16xx;
+	};
+
+	/* These aliases are provided for compatibility with samples */
+	aliases {
+		led0 = &led0;
+		led1 = &led1;
+		led2 = &led2;
+		led3 = &led3;
+		led4 = &led4;
+		sw0 = &button0;
+		sw1 = &button1;
+		watchdog0 = &wdt0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led_0 {
+			gpios = <&gpio0 18 0>;
+			label = "Red LED 0";
+		};
+		led1: led_1 {
+			gpios = <&gpio0 19 0>;
+			label = "Red LED 1";
+		};
+		led2: led_2 {
+			gpios = <&gpio0 20 0>;
+			label = "Red LED 2";
+		};
+		led3: led_3 {
+			gpios = <&gpio0 21 0>;
+			label = "Red LED 3";
+		};
+		led4: led_4 {
+			gpios = <&gpio0 22 0>;
+			label = "Red LED 4";
+		};
+	};
+
+	buttons {
+		/* Push button switch 0 KEY1 */
+		compatible = "gpio-keys";
+		button0: button_0 {
+			gpios = <&gpio0 16 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 0";
+		};
+		/* Push button switch 1 KEY2 */
+		button1: button_1 {
+			gpios = <&gpio0 17 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 1";
+		};
+	};
+	barrot {
+		compatible = "barrot_serial";
+		btaddr = [82 72 95 83 15 00];
+
+		modbus0 {
+			compatible = "zephyr,modbus-serial";
+			status = "okay";
+	};
+
+	};
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	/* smba-pin = <2>; */
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-1 = <&i2c0_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&spi1 {
+	compatible = "nordic,nrf-spi";
+	status = "okay";
+	cs-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+	pinctrl-0 = <&spi1_default>;
+	pinctrl-1 = <&spi1_sleep>;
+	pinctrl-names = "default", "sleep";
+	
+	ssd16xx: ssd16xxfb@0 {
+		compatible = "gooddisplay,GDEM029T94", "solomon,ssd1680", "solomon,ssd16xxfb";
+		spi-max-frequency = <4000000>;
+		reg = <0>;
+		width = <296>;
+		height = <136>; // it's 128 but needs 136
+		pp-width-bits = <8>;
+		pp-height-bits = <16>;
+		dc-gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
+		busy-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+		gdv = [17];
+		sdv = [41 00 32];
+		vcom = <0x36>;
+		//orientation-flipped;
+		border-waveform = <0xC0>;
+		//softstart = [d7 d6 9d];
+		lut-initial = [
+			80 66 00 00 00 00 00 00
+			40 00 00 00 10 66 00 00
+			00 00 00 00 20 00 00 00
+			80 66 00 00 00 00 00 00
+			40 00 00 00 10 66 00 00
+			00 00 00 00 20 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 14 08 00 00
+			00 00 01 0a 0a 00 0a 0a
+			00 01 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 14 08 00 01
+			00 00 01 00 00 00 00 00
+			00 01 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			44 44 44 44 44 44 00 00
+			00
+		];
+		lut-default = [
+			00 40 00 00 00 00 00 00
+			00 00 00 00 80 80 00 00
+			00 00 00 00 00 00 00 00
+			40 40 00 00 00 00 00 00
+			00 00 00 00 00 80 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 0a 00 00 00
+			00 00 02 01 00 00 00 00
+			00 00 01 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00
+			22 22 22 22 22 22 00 00
+			00
+		];
+	};
+};
+
+&uart0 {
+	current-speed = <115200>;
+	status = "okay";
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-1 = <&uart0_sleep>;
+	pinctrl-names = "default", "sleep";
+};

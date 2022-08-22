@@ -381,14 +381,9 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
 	.disconnected = disconnected,
 };
 
-static struct bt_gatt_cb gatt_callbacks = {
-};
 
 void barrot_init()
 {
-
-	bt_gatt_cb_register(&gatt_callbacks);
-
 	bt_le_scan_start(BT_LE_SCAN_ACTIVE, device_found);
 	return;
 }

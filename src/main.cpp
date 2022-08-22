@@ -53,6 +53,11 @@ int d_print(int c)
 	return 1;
 }
 
+void bt_enabled(int err)
+{
+	barrot_init();
+}
+
 int main(void)
 {
 	if(!tlay2.Init())
@@ -66,12 +71,10 @@ int main(void)
 	if(err)
 		return err;
 
-	err = bt_enable(NULL);
+	err = bt_enable(bt_enabled);
 	if (err) {
 		return 1;
 	}
-
-	barrot_init();
 
 
 	k_mutex_init(&reg_data.mut);

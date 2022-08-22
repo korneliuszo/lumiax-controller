@@ -169,7 +169,7 @@ public:
 		tx_init(0,0);
 		rc = cbvprintf((cbprintf_cb)cwrap_tx_byte, this, format, ap);
 		tx_end();
-		while(uart.fifo_tx.check());
+		//while(uart.fifo_tx.check());
 		return rc;
 	}
 

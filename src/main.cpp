@@ -58,8 +58,35 @@ void bt_enabled(int err)
 	barrot_init();
 }
 
+#define DISPLAY_STACK_SIZE 500
+K_THREAD_STACK_DEFINE(display_stack_area, DISPLAY_STACK_SIZE);
+struct k_thread display_thread_data;
+
+void display_thread(void*,void*,void*)
+{
+	int spinner_idx=0;
+	char spinner[] = "/-\\|";
+	while(true)
+	{
+		k_sem_take(&reg_data.new_sample,K_FOREVER);
+		k_mutex_lock(&reg_data.mut, K_FOREVER);
+		Reg_data::Data cached = reg_data.d;
+		k_mutex_unlock(&reg_data.mut);
+
+		{
+			auto l = display.lock();
+			display.print_chr(0,0,spinner[spinner_idx++]);
+			display.blank_off();
+		}
+		if (!spinner[spinner_idx])
+			spinner_idx=0;
+	}
+}
+
 int main(void)
 {
+	k_mutex_init(&reg_data.mut);
+
 	if(!tlay2.Init())
 		return 1;
 
@@ -76,26 +103,18 @@ int main(void)
 		return 1;
 	}
 
+	k_sem_init(&reg_data.new_sample, 0, 1);
 
-	k_mutex_init(&reg_data.mut);
-
+	k_thread_create(&display_thread_data, display_stack_area,
+	                                 K_THREAD_STACK_SIZEOF(display_stack_area),
+	                                 display_thread,
+	                                 NULL, NULL, NULL,
+	                                 5, 0, K_NO_WAIT);
 	if (init_modbus_client()) {
 		tlay2.printt("Modbus RTU client initialization failed");
 		return 1;
 	}
 
-
-	display.blank_off();
-
-	display.print_chr(32,0,'a');
-
-	display.print_chr(32,32,'a');
-
-	display.print_chr(48,48,'a');
-
-	display.print_chr(48,128,'a');
-
-	display.print_chr(32,120,'a');
 
 	while(1)
 	{
@@ -107,14 +126,15 @@ int main(void)
 			continue;
 		}
 		k_mutex_lock(&reg_data.mut, K_FOREVER);
-		reg_data.b_soc = holding_reg[0];
-		reg_data.b_v = holding_reg[1];
-		reg_data.b_a = holding_reg[2];
-		reg_data.l_v = holding_reg[5];
-		reg_data.l_a = holding_reg[6];
-		reg_data.s_v = holding_reg[9];
-		reg_data.s_a = holding_reg[10];
+		reg_data.d.b_soc = holding_reg[0];
+		reg_data.d.b_v = holding_reg[1];
+		reg_data.d.b_a = holding_reg[2];
+		reg_data.d.l_v = holding_reg[5];
+		reg_data.d.l_a = holding_reg[6];
+		reg_data.d.s_v = holding_reg[9];
+		reg_data.d.s_a = holding_reg[10];
 		k_mutex_unlock(&reg_data.mut);
+		k_sem_give(&reg_data.new_sample);
 		printt("Read ok");
 
 		//k_msleep(1000);

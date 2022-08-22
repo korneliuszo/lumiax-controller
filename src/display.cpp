@@ -30,9 +30,12 @@ int Display::Init()
 
 void Display::blank_off()
 {
-	k_mutex_lock(&mut, K_FOREVER);
 	display_blanking_off(dev);
-	k_mutex_unlock(&mut);
+}
+
+void Display::blank_on()
+{
+	display_blanking_on(dev);
 }
 
 void Display::print_chr(int x, int y, char c)
@@ -52,16 +55,15 @@ void Display::print_chr(int x, int y, char c)
 			.height=16,
 			.pitch=8
 	};
-
-
-	k_mutex_lock(&mut, K_FOREVER);
 	display_write(dev,x,y,&desc,my_font_[idx]);
-	k_mutex_unlock(&mut);
-
 }
 
 void Display::print_str(int x, int y, const char* str)
 {
-
+	while(*str)
+	{
+		print_chr(x,y,*str++);
+		x+=8;
+	}
 }
 

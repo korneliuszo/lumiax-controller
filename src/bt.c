@@ -412,7 +412,7 @@ static void barrot_irq_rx_enable(const struct device *dev)
 
 static void barrot_irq_rx_disable(const struct device *dev)
 {
-	atomic_clear_bit(&uart_barrot_data_0.tx.state,0);
+	atomic_clear_bit(&uart_barrot_data_0.rx.state,0);
 }
 
 static void barrot_irq_callback_set(const struct device *dev,
@@ -485,7 +485,7 @@ static int barrot_irq_rx_ready(const struct device *dev)
 
 int barrot_irq_tx_complete(const struct device *dev)
 {
-	return uart_barrot_data_0.initial_credit == uart_barrot_data_0.credit;
+	return 1;
 }
 
 

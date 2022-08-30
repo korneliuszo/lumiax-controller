@@ -17,17 +17,13 @@ public:
 	FIFO() : data(), data_end(&data[LEN]), wrptr(data), rdptr(data){};
 	void clear()
 	{
-		auto key = irq_lock();
 		atomic_ptr_set(&wrptr, data);
 		atomic_ptr_set(&rdptr, data);
-		irq_unlock(key);
 	}
 	inline intptr_t put(CNT val)
 	{
-		auto key = irq_lock();
 		volatile CNT *tmwr = (volatile CNT *)atomic_ptr_get(&wrptr);
 		volatile CNT *tmrd = (volatile CNT *)atomic_ptr_get(&rdptr);
-		irq_unlock(key);
 
 		tmwr += 1;
 		if(tmwr == data_end)
@@ -41,10 +37,8 @@ public:
 	}
 	inline intptr_t get(CNT* val)
 	{
-		auto key = irq_lock();
 		volatile CNT *tmwr = (volatile CNT *)atomic_ptr_get(&wrptr);
 		volatile CNT *tmrd = (volatile CNT *)atomic_ptr_get(&rdptr);
-		irq_unlock(key);
 		if (tmwr == tmrd)
 			return 0;
 		tmrd += 1;
@@ -56,10 +50,8 @@ public:
 	}
 	inline intptr_t check()
 	{
-		auto key = irq_lock();
 		volatile CNT *tmwr = (volatile CNT *)atomic_ptr_get(&wrptr);
 		volatile CNT *tmrd = (volatile CNT *)atomic_ptr_get(&rdptr);
-		irq_unlock(key);
 		int ret = (tmwr - tmrd);
 		if (ret < 0) ret +=LEN;
 		return ret;

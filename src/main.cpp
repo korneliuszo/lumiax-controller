@@ -76,7 +76,7 @@ void display_thread(void*,void*,void*)
 		{
 			auto l = display.lock();
 			display.print_chr(0,0,spinner[spinner_idx++]);
-			display.blank_off();
+			display.update();
 		}
 		if (!spinner[spinner_idx])
 			spinner_idx=0;

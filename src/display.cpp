@@ -10,6 +10,7 @@
 #include "display.hpp"
 #include "printt.h"
 #include "font.h"
+#include <string.h>
 
 int Display::Init()
 {
@@ -24,19 +25,25 @@ int Display::Init()
 		printt("Failed to set required pixel format");
 		return 1;
 	}
+
+	memset(buff,0xff,sizeof(buff));
+
 	printt("Initialized %s", dev->name);
 	return 0;
 }
 
-void Display::blank_off()
+void Display::update()
 {
 	display_blanking_off(dev);
+	struct display_buffer_descriptor desc={
+			.buf_size=128*296/8,
+			.width=296,
+			.height=128,
+			.pitch=296
+	};
+	display_write(dev,0,0,&desc,buff);
 }
 
-void Display::blank_on()
-{
-	display_blanking_on(dev);
-}
 
 void Display::print_chr(int x, int y, char c)
 {
@@ -48,14 +55,10 @@ void Display::print_chr(int x, int y, char c)
 	}
 	if(!my_font_map_[idx])
 		idx=0;
-
-	struct display_buffer_descriptor desc={
-			.buf_size=16,
-			.width=8,
-			.height=16,
-			.pitch=8
-	};
-	display_write(dev,x,y,&desc,my_font_[idx]);
+	for(int yp=0;yp<16;yp++)
+	{
+		buff[296/8*8*((yp+y)>>3)+(yp+y)%8+x] = my_font_[idx][yp];
+	}
 }
 
 void Display::print_str(int x, int y, const char* str)

@@ -13,6 +13,7 @@
 class Display {
 	const struct device *dev;
 	k_mutex mut;
+	uint8_t buff[128*296/8];
 public:
 	class Display_lock
 	{
@@ -33,8 +34,7 @@ public:
 	{
 		return Display_lock(&mut);
 	}
-	void blank_off();
-	void blank_on();
+	void update();
 	void print_chr(int x, int y, char c);
 	void print_str(int x, int y, const char* str);
 };

@@ -5,6 +5,8 @@
 
 #include "main_modules.hpp"
 #include "printt.h"
+#include "stdio.h"
+
 extern "C" void barrot_init();
 
 struct Reg_data reg_data;
@@ -76,6 +78,12 @@ void display_thread(void*,void*,void*)
 		{
 			auto l = display.lock();
 			display.print_chr(0,0,spinner[spinner_idx++]);
+			char buff[13];
+			snprintf(buff,13,"Bat %6.2u%%",cached.b_soc);
+			display.print_str(0,16,buff);
+			snprintf(buff,13,"Bat %+.2d.%.2uV",cached.b_v/100,cached.b_v%100);
+			display.print_str(0,32,buff);
+
 			display.update();
 		}
 		if (!spinner[spinner_idx])

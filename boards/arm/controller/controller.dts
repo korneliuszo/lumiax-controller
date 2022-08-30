@@ -122,7 +122,7 @@
 		//softstart = [d7 d6 9d];
 		cntrl1-data = [00 80];
 		data-mode-2;
-		display-option-data = [00 00 00 00 00 40 00 00 00 00];
+		otp-selection-ctl = [00 00 00 00 00 40 00 00 00 00];
 		lut-initial = [
 			80 66 00 00 00 00 00 00
 			40 00 00 00 10 66 00 00

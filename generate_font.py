@@ -14,7 +14,7 @@ add_string(used_set,"1234567890")
 add_string(used_set,"Bat")
 add_string(used_set,"PV")
 add_string(used_set,"Out")
-add_string(used_set,"VA%+- ")
+add_string(used_set,"VA%+- .")
 add_string(used_set,"/-\\|")
 
 if "?" in used_set:

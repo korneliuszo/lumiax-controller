@@ -23,6 +23,7 @@ struct Reg_data {
 	uint16_t l_a;
 	uint16_t s_v;
 	uint16_t s_a;
+	bool on;
 	} d;
 	k_mutex mut;
 	k_sem new_sample;

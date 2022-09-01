@@ -2,6 +2,7 @@
 #include <zephyr/device.h>
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/modbus/modbus.h>
+#include <zephyr/drivers/gpio.h>
 
 #include "main_modules.hpp"
 #include "printt.h"
@@ -105,6 +106,12 @@ void display_thread(void*,void*,void*)
 int main(void)
 {
 	k_mutex_init(&reg_data.mut);
+
+	{
+		const device * dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+		gpio_pin_configure(dev, 23, GPIO_OUTPUT);
+		gpio_pin_set(dev, 23, 1);
+	}
 
 	if(!tlay2.Init())
 		return 1;

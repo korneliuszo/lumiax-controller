@@ -16,6 +16,7 @@ add_string(used_set,"PV")
 add_string(used_set,"Out")
 add_string(used_set,"VA%+- .")
 add_string(used_set,"/-\\|")
+add_string(used_set,"ONOFF")
 
 if "?" in used_set:
     used_set.remove("?")

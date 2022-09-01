@@ -201,6 +201,9 @@ static uint8_t notify_rx_func(struct bt_conn *conn,
 	}
 
 	//printt("[NOTIFICATION_RX] data %p length %u", data, length);
+	//uint8_t *d = (uint8_t*)data;
+	//printt("%02x %02x %02x %02x %02x %02x %02x %02x",
+	//		d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7]);
 
 	struct uart_barrot_data *uart_data = CONTAINER_OF(state,struct uart_barrot_data,rx);
 	k_mutex_lock(&uart_data->irq_mutex, K_FOREVER);

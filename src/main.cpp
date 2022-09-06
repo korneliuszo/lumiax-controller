@@ -103,6 +103,13 @@ void display_thread(void*,void*,void*)
 	}
 }
 
+void pb_expiry(struct k_timer *timer)
+{
+	atomic_set(&onoff,!atomic_get(&onoff));
+}
+
+K_TIMER_DEFINE(pb_timer, pb_expiry, NULL);
+
 struct gpio_callback gpio_cb_str;
 
 atomic_t onoff = ATOMIC_INIT(0);
@@ -147,6 +154,28 @@ void gpio_cb(const struct device *port, struct gpio_callback *cb, gpio_port_pins
 		}
 		last_push = now;
 	}
+	if(pins & (1<<25))
+	{
+		gpio_port_value_t rd;
+		gpio_port_get(port,&rd);
+		printt("aa %d",rd &(1<<25));
+		if(rd &(1<<25))
+		{
+			k_timer_stop(&pb_timer);
+		}
+		else
+		{
+			if(atomic_get(&onoff))
+			{
+				printt("SHUTDOWN EVENT");
+				k_timer_start(&pb_timer,K_SECONDS(5),K_NO_WAIT);
+			}
+			else
+			{
+				k_timer_start(&pb_timer,K_SECONDS(1),K_NO_WAIT);
+			}
+		}
+	}
 }
 
 int main(void)
@@ -162,7 +191,7 @@ int main(void)
 		gpio_pin_configure(dev, 24, GPIO_INPUT | GPIO_PULL_UP);
 		gpio_pin_configure(dev, 25, GPIO_INPUT | GPIO_PULL_UP);
 		gpio_pin_interrupt_configure(dev, 24, GPIO_INT_EDGE_BOTH);
-		gpio_pin_interrupt_configure(dev, 25, GPIO_INT_EDGE_FALLING);
+		gpio_pin_interrupt_configure(dev, 25, GPIO_INT_EDGE_BOTH);
 
 	}
 

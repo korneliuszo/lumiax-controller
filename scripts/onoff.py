@@ -12,8 +12,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Control power')
     
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-0', '--on', action='store_true')
-    group.add_argument('-1', '--off', action='store_true')
+    group.add_argument('-1', '--on', action='store_true')
+    group.add_argument('-0', '--off', action='store_true')
     
     args = parser.parse_args()
 

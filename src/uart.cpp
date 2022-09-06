@@ -26,6 +26,17 @@ void process_packet(Tlay2<128>* obj, uint8_t*data,size_t len)
 		obj->tx_end();
 		break;
 	}
+	case 2: // display
+	{
+		uint16_t offset = obj->rx_u16(&data[2]);
+		{
+			uint8_t *buffptr = &display.buff[offset];
+			memcpy(buffptr,&data[4],len-4);
+		}
+		obj->tx_init_reply();
+		obj->tx_end();
+		break;
+	}
 	default:
 		break;
 	}

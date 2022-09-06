@@ -13,8 +13,8 @@
 class Display {
 	const struct device *dev;
 	k_mutex mut;
-	uint8_t buff[128*296/8];
 public:
+	uint8_t buff[128*296/8];
 	class Display_lock
 	{
 		k_mutex *m;

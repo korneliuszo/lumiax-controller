@@ -68,18 +68,25 @@ struct k_thread display_thread_data;
 void display_thread(void*,void*,void*)
 {
 	int spinner_idx=0;
+	int spinner_data_idx=0;
 	char spinner[] = "/-\\|";
+	Reg_data::Data cached = {};
 	while(true)
 	{
-		k_sem_take(&reg_data.new_sample,K_FOREVER);
-		k_mutex_lock(&reg_data.mut, K_FOREVER);
-		Reg_data::Data cached = reg_data.d;
-		k_mutex_unlock(&reg_data.mut);
-
+		if(!k_sem_take(&reg_data.new_sample,K_NO_WAIT))
 		{
-			auto l = display.lock();
+			k_mutex_lock(&reg_data.mut, K_FOREVER);
+			cached = reg_data.d;
+			k_mutex_unlock(&reg_data.mut);
+			spinner_data_idx++;
+			if (!spinner[spinner_data_idx])
+				spinner_data_idx=0;
+		}
+		{
+			//auto l = display.lock();
 			display.print_chr(0,0,spinner[spinner_idx++]);
-			display.print_str(16,0,cached.on ? " ON":"OFF");
+			display.print_chr(8,0,spinner[spinner_data_idx]);
+			display.print_str(32,0,cached.on ? " ON":"OFF");
 			char buff[13];
 			snprintf(buff,13,"Bat %6.2u%%",cached.b_soc);
 			display.print_str(0,16,buff);
@@ -217,7 +224,7 @@ int main(void)
 	                                 K_THREAD_STACK_SIZEOF(display_stack_area),
 	                                 display_thread,
 	                                 NULL, NULL, NULL,
-	                                 5, 0, K_NO_WAIT);
+	                                 10, 0, K_NO_WAIT);
 	if (init_modbus_client()) {
 		tlay2.printt("Modbus RTU client initialization failed");
 		return 1;

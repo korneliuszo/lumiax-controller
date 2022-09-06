@@ -96,7 +96,8 @@ public:
 		ret = uart.Init();
 		if(!ret)
 			return ret;
-		k_thread_create(&rx_thread,rx_stack, rx_stack_size,rx_thread_c,this,NULL,NULL,5,0,K_NO_WAIT);
+		k_tid_t tid = k_thread_create(&rx_thread,rx_stack, rx_stack_size,rx_thread_c,this,NULL,NULL,5,0,K_NO_WAIT);
+		k_thread_name_set(tid,"Tlay2");
 		return true;
 	}
 

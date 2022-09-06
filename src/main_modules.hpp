@@ -37,6 +37,7 @@ extern Tlay2<128> tlay2;
 
 extern Display display;
 
+extern int client_iface;
 
 
 

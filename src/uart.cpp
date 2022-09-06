@@ -1,7 +1,8 @@
 #include "main_modules.hpp"
 #include <zephyr/device.h>
+#include <zephyr/modbus/modbus.h>
 
-K_KERNEL_STACK_DEFINE(tlay2_stack,300);
+K_KERNEL_STACK_DEFINE(tlay2_stack,1000);
 
 
 void process_packet(Tlay2<128>* obj, uint8_t*data,size_t len);
@@ -18,6 +19,14 @@ void process_packet(Tlay2<128>* obj, uint8_t*data,size_t len)
 			obj->tx_byte(data[i]);
 		obj->tx_end();
 		break;
+	case 1: // set power
+	{
+		int ret = modbus_write_coil(client_iface, 1, 0x0000, !data[2]);
+		obj->tx_init_reply();
+		obj->tx_u32(ret);
+		obj->tx_end();
+		break;
+	}
 	default:
 		break;
 	}

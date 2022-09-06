@@ -61,7 +61,7 @@ void bt_enabled(int err)
 	barrot_init();
 }
 
-#define DISPLAY_STACK_SIZE 500
+#define DISPLAY_STACK_SIZE 1000
 K_THREAD_STACK_DEFINE(display_stack_area, DISPLAY_STACK_SIZE);
 struct k_thread display_thread_data;
 
@@ -153,12 +153,11 @@ int main(void)
 		}
 
 		uint16_t onoff;
-		if(modbus_read_holding_regs(client_iface, 1, 0x902C, &onoff,1)!=0)
+		if(modbus_read_input_regs(client_iface, 1, 0x3035, &onoff,1)!=0)
 		{
 			printt("Read fail3");
 			continue;
 		}
-		printt("%d", onoff);
 		k_mutex_lock(&reg_data.mut, K_FOREVER);
 		reg_data.d.b_soc = holding_reg[0];
 		reg_data.d.b_v = holding_reg[1];
@@ -167,7 +166,7 @@ int main(void)
 		reg_data.d.l_a = holding_reg[6];
 		reg_data.d.s_v = holding_reg[9];
 		reg_data.d.s_a = holding_reg[10];
-		reg_data.d.on = onoff == 0;
+		reg_data.d.on = (onoff&1) == 1;
 		k_mutex_unlock(&reg_data.mut);
 		k_sem_give(&reg_data.new_sample);
 		printt("Read ok");

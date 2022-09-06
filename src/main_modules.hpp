@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <zephyr/kernel.h>
+#include <zephyr/sys/atomic.h>
 
 struct Reg_data {
 	struct Data {
@@ -39,6 +40,6 @@ extern Display display;
 
 extern int client_iface;
 
-
+extern atomic_t onoff;
 
 #endif /* MAIN_MODULES_HPP_ */

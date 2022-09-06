@@ -103,6 +103,52 @@ void display_thread(void*,void*,void*)
 	}
 }
 
+struct gpio_callback gpio_cb_str;
+
+atomic_t onoff = ATOMIC_INIT(0);
+
+void gpio_cb(const struct device *port, struct gpio_callback *cb, gpio_port_pins_t pins)
+{
+	printt("GPIO 0x%04x",pins);
+	if(pins & (1<<24))
+	{
+		static uint64_t last_push = 0;
+		enum class STATE{
+			INIT,
+			SECOND,
+			THIRD,
+		};
+		static STATE state = STATE::INIT;
+		uint64_t now = k_uptime_get();
+		uint64_t diff = now - last_push;
+		printt("GPIO pwrdown delta %lld",diff);
+
+		switch(state)
+		{
+		case STATE::INIT:
+		default:
+			state = STATE::SECOND;
+			break;
+		case STATE::SECOND:
+			if (diff<110 && diff>90)
+				state = STATE::THIRD;
+			else
+				state = STATE::SECOND;
+			break;
+		case STATE::THIRD:
+			if (diff<110 && diff>90)
+			{
+				state = STATE::SECOND;
+				printt("Poweringoff");
+				modbus_write_coil(client_iface, 1, 0x0000, 1);
+			}
+			else
+				state = STATE::SECOND;
+		}
+		last_push = now;
+	}
+}
+
 int main(void)
 {
 	k_mutex_init(&reg_data.mut);
@@ -111,6 +157,13 @@ int main(void)
 		const device * dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 		gpio_pin_configure(dev, 23, GPIO_OUTPUT);
 		gpio_pin_set(dev, 23, 1);
+		gpio_init_callback(&gpio_cb_str,gpio_cb,(1<<25)|(1<<24));
+		gpio_add_callback(dev,&gpio_cb_str);
+		gpio_pin_configure(dev, 24, GPIO_INPUT | GPIO_PULL_UP);
+		gpio_pin_configure(dev, 25, GPIO_INPUT | GPIO_PULL_UP);
+		gpio_pin_interrupt_configure(dev, 24, GPIO_INT_EDGE_BOTH);
+		gpio_pin_interrupt_configure(dev, 25, GPIO_INT_EDGE_FALLING);
+
 	}
 
 	if(!tlay2.Init())
@@ -152,12 +205,18 @@ int main(void)
 			continue;
 		}
 
-		uint16_t onoff;
-		if(modbus_read_input_regs(client_iface, 1, 0x3035, &onoff,1)!=0)
+		uint16_t onoff_rd;
+		if(modbus_read_input_regs(client_iface, 1, 0x3035, &onoff_rd,1)!=0)
 		{
 			printt("Read fail3");
 			continue;
 		}
+
+		if((!!(onoff_rd&1)) != (!!atomic_get(&onoff))){
+			modbus_write_coil(client_iface, 1, 0x0000, !!atomic_get(&onoff));
+		}
+
+
 		k_mutex_lock(&reg_data.mut, K_FOREVER);
 		reg_data.d.b_soc = holding_reg[0];
 		reg_data.d.b_v = holding_reg[1];
@@ -166,7 +225,7 @@ int main(void)
 		reg_data.d.l_a = holding_reg[6];
 		reg_data.d.s_v = holding_reg[9];
 		reg_data.d.s_a = holding_reg[10];
-		reg_data.d.on = (onoff&1) == 1;
+		reg_data.d.on = (onoff_rd&1) == 1;
 		k_mutex_unlock(&reg_data.mut);
 		k_sem_give(&reg_data.new_sample);
 		printt("Read ok");

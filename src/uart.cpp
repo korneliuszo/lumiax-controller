@@ -21,9 +21,8 @@ void process_packet(Tlay2<128>* obj, uint8_t*data,size_t len)
 		break;
 	case 1: // set power
 	{
-		int ret = modbus_write_coil(client_iface, 1, 0x0000, !data[2]);
+		atomic_set(&onoff,!!data[2]);
 		obj->tx_init_reply();
-		obj->tx_u32(ret);
 		obj->tx_end();
 		break;
 	}

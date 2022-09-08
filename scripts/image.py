@@ -22,8 +22,8 @@ def send_image(img):
     a=tlay2_client.Tlay2_msg(2)
     for i in range(len(data)):
         line = data[i]
-        for j in range(0, len(line), 32):
-            chunk = line[j:j+32]
+        for j in range(0, len(line), 64):
+            chunk = line[j:j+64]
             a.msg(struct.pack("<H",96+j+i*(296//8)*8)+chunk)
     
 if __name__ == "__main__":

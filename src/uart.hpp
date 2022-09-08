@@ -17,7 +17,6 @@ private:
 	rx_callback_t rx_callback;
 	void* rx_callback_obj;
 	FIFO<RX_SIZE> fifo_rx;
-public:
 	FIFO<TX_SIZE> fifo_tx;
 private:
 	struct k_sem tx_sem_wait;

@@ -28,13 +28,14 @@ private:
 	}
 	void isr()
 	{
-		if (!uart_irq_update(dev) || !uart_irq_is_pending(dev))
+		if (!uart_irq_update(dev))
 			return;
 
-		if(uart_irq_rx_ready(dev))
+		while(uart_irq_rx_ready(dev))
 		{
 			uint8_t recvData;
-			uart_fifo_read(dev, &recvData, 1);
+			if(uart_fifo_read(dev, &recvData, 1)!=1)
+				break;
 			if(rx_callback)
 			{
 				if(rx_callback(rx_callback_obj,&recvData))
@@ -45,7 +46,7 @@ private:
 				fifo_rx.put(recvData);
 			}
 		}
-		if(uart_irq_tx_ready(dev))
+		while(uart_irq_tx_ready(dev))
 		{
 			uint8_t val;
 			intptr_t cnt = fifo_tx.get(&val);

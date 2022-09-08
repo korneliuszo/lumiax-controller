@@ -7,7 +7,7 @@ import threading
 import socket
 import os
 
-ser = serial.Serial(sys.argv[1], 115200)
+ser = serial.Serial(sys.argv[1], 57600)
 
 crc8 = crcmod.predefined.mkCrcFun('crc-8')
 

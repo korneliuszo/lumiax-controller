@@ -7,6 +7,7 @@
 #include "main_modules.hpp"
 #include "printt.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 extern "C" void barrot_init();
 
@@ -90,17 +91,17 @@ void display_thread(void*,void*,void*)
 			char buff[13];
 			snprintf(buff,13,"Bat %6.2u%%",cached.b_soc);
 			display.print_str(0,16,buff);
-			snprintf(buff,13,"Bat %+.2d.%.2uV",cached.b_v/100,cached.b_v%100);
+			snprintf(buff,13,"Bat %+.2d.%.2uV",cached.b_v/100,abs(cached.b_v%100));
 			display.print_str(0,32,buff);
-			snprintf(buff,13,"Bat %+.2d.%.2uA",cached.b_a/100,cached.b_a%100);
+			snprintf(buff,13,"Bat %+.2d.%.2uA",cached.b_a/100,abs(cached.b_a%100));
 			display.print_str(0,48,buff);
-			snprintf(buff,13,"PV  %+.2d.%.2uV",cached.s_v/100,cached.s_v%100);
+			snprintf(buff,13,"PV  %+.2d.%.2uV",cached.s_v/100,abs(cached.s_v%100));
 			display.print_str(0,64,buff);
-			snprintf(buff,13,"PV  %+.2d.%.2uA",cached.s_a/100,cached.s_a%100);
+			snprintf(buff,13,"PV  %+.2d.%.2uA",cached.s_a/100,abs(cached.s_a%100));
 			display.print_str(0,80,buff);
-			snprintf(buff,13,"Out %+.2d.%.2uV",cached.l_v/100,cached.l_v%100);
+			snprintf(buff,13,"Out %+.2d.%.2uV",cached.l_v/100,abs(cached.l_v%100));
 			display.print_str(0,96,buff);
-			snprintf(buff,13,"Out %+.2d.%.2uA",cached.l_a/100,cached.l_a%100);
+			snprintf(buff,13,"Out %+.2d.%.2uA",cached.l_a/100,abs(cached.l_a%100));
 			display.print_str(0,112,buff);
 
 			display.update();

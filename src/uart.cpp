@@ -37,6 +37,23 @@ void process_packet(Tlay2<128>* obj, uint8_t*data,size_t len)
 		obj->tx_end();
 		break;
 	}
+	case 3: // read status
+	{
+		k_mutex_lock(&reg_data.mut, K_FOREVER);
+		Reg_data::Data cached = reg_data.d;
+		k_mutex_unlock(&reg_data.mut);
+		obj->tx_init_reply();
+		obj->tx_u16(cached.b_soc);
+		obj->tx_u16(cached.b_v);
+		obj->tx_u16(cached.b_a);
+		obj->tx_u16(cached.l_v);
+		obj->tx_u16(cached.l_a);
+		obj->tx_u16(cached.s_v);
+		obj->tx_u16(cached.s_a);
+		obj->tx_byte(cached.on);
+		obj->tx_end();
+		break;
+	}
 	default:
 		break;
 	}

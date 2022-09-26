@@ -155,7 +155,7 @@ void gpio_cb(const struct device *port, struct gpio_callback *cb, gpio_port_pins
 			{
 				state = STATE::SECOND;
 				printt("Poweringoff");
-				modbus_write_coil(client_iface, 1, 0x0000, 1);
+				atomic_set(&onoff,0);
 			}
 			else
 				state = STATE::SECOND;
